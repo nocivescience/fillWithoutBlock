@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    #canvas{
+        border: 2px solid #000000;
+        border-radius: 10px;
+    }
+</style>
+<body>
+    <canvas id="canvas" width="600" height="600"></canvas>
+    <script>
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        const fps = 30;
+        var columnas = 20;
+        var filas = 20;
+        var esceneario, anchoT, altoT, principio, fin;
+        const muroColor = '#000000';
+        const pisoColor = '#ffffff';
+        var openSet = [];
+        var closedSet = [];
+        var camino = [];
+        var terminado = false;
+        function crearArray2D(f,c){
+            var obj = new Array(f);
+            for (let i = 0; i < f; i++) {
+                obj[i] = new Array(c);
+            }
+            return obj
+        }
+        function heurisitica(a,b){
+            var d = Math.abs(a.i - b.i) + Math.abs(a.j - b.j);
+            return d;
+        }
+        function borraDelArray(array, elemento){
+            for (let i = array.length - 1; i >= 0; i--) {
+                if(array[i] == elemento){
+                    array.splice(i,1);
+                }
+            }
+        }
+        class Casilla{
+            constructor(x,y){
+                this.x = x;
+                this.y = y;
+                this.tipo = 0;
+                var aleatorio = Math.floor(Math.random()*5);
+                if(aleatorio == 1){
+                    this.tipo = 1;
+                }
+                this.f = 0;
+                this.g = 0;
+                this.h = 0;
+                this.vecinos = [];
+                this.padre = null;
+                this.addeVecinos = function(){
+                    if(this.x>0){
+                        this.vecinos.push(esceneario[this.y][this.x-1]); //vecino izquierdo
+                    }
+                    if(this.x<filas-1){
+                        this.vecinos.push(esceneario[this.y][this.x+1]); //vecino derecho
+                    }
+                    if(this.y>0){
+                        this.vecinos.push(esceneario[this.y-1][this.x]); //vecino arriba
+                    }
+                    if(this.y<columnas-1){
+                        this.vecinos.push(esceneario[this.y+1][this.x]); //vecino abajo
+                    }
+                }
+                this.dibuja = function(){
+                    var color;
+                    if(this.tipo == 0){
+                        color = pisoColor;
+                    }
+                    if(this.tipo == 1){
+                        color = muroColor;
+                    }
+                    ctx.fillStyle = color;
+                    ctx.fillRect(this.x*anchoT, this.y*altoT, anchoT, altoT);     
+                }
+                this.dibujaOS = function(){
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillRect(this.x*anchoT, this.y*altoT, anchoT, altoT);
+                }
+                this.dibujaCS = function(){
+                    ctx.fillStyle = '#00ff00';
+                    ctx.fillRect(this.x*anchoT, this.y*altoT, anchoT, altoT);
+                }
+                this.dibujarCamino = function(){
+                    ctx.fillStyle = '#0000ff';
+                    ctx.fillRect(this.x*anchoT, this.y*altoT, anchoT, altoT);
+                }
+            }
+        }
+        const init = () => {
+            canvas=document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            anchoT = parseInt(canvas.width/columnas);
+            altoT = parseInt(canvas.height/filas);
+            esceneario = crearArray2D(filas,columnas);
+            for(let j = 0; j < columnas; j++){
+                for(let i = 0; i < filas; i++){
+                    esceneario[j][i] = new Casilla(i,j);
+                }
+            }
+            for(let j = 0; j < columnas; j++){
+                for(let i = 0; i < filas; i++){
+                    esceneario[j][i].addeVecinos();
+                }
+            }
+            principio = esceneario[0][0];
+            fin = esceneario[columnas-1][filas-1];
+            openSet.push(principio);
+            setInterval(() => {
+                principal();
+            }, 1000/fps);
+        }
+        function dibujaEsceneario(){
+            for (let j = 0; j < columnas; j++) {
+                for (let i = 0; i < filas; i++) {
+                    esceneario[j][i].dibuja();
+                }
+            }
+            for (let i = 0; i < closedSet.length; i++) {
+                closedSet[i].dibujaCS();
+            }
+            for (let i = 0; i < openSet.length; i++) {
+                openSet[i].dibujaOS();
+            }
+            for(let i = 0; i < camino.length; i++){
+                camino[i].dibujarCamino();
+            }
+        }
+        function borraCanvas(){
+            canvas.width = canvas.width;
+            canvas.height = canvas.height;
+        }
+        function algoritmo(){
+            if(openSet.length > 0){
+                var ganador = 0;
+                for (let i = 0; i < openSet.length; i++) {
+                    if(openSet[i].f < openSet[ganador].f){
+                        ganador = i;
+                    }
+                }
+                var actual = openSet[ganador];
+                if(actual === fin){
+                    var temp = actual;
+                    camino.push(temp);
+                    while(temp.padre){
+                        camino.push(temp.padre);
+                        temp = temp.padre;
+                    }
+                    console.log('Terminado');
+                    terminado = true;
+                }
+                borraDelArray(openSet, actual);
+                closedSet.push(actual);
+                var vecinos = actual.vecinos;
+                for (let i = 0; i < vecinos.length; i++) {
+                    var vecino = vecinos[i];
+                    if(!closedSet.includes(vecino) && vecino.tipo != 1){
+                        var tempG = actual.g + 1;
+                        var nuevoCamino = false;
+                        if(openSet.includes(vecino)){
+                            if(tempG < vecino.g){
+                                vecino.g = tempG;
+                                nuevoCamino = true;
+                            }
+                        }else{
+                            vecino.g = tempG;
+                            nuevoCamino = true;
+                            openSet.push(vecino);
+                        }
+                        if(nuevoCamino){
+                            vecino.h = heurisitica(vecino, fin);
+                            vecino.f = vecino.g + vecino.h;
+                            vecino.padre = actual;
+                        }
+                    }
+                }
+            }else{
+                console.log('No hay solucion');
+                terminado = true;
+                return;
+            }
+        }
+        function principal(){
+            borraCanvas();
+            algoritmo();
+            dibujaEsceneario();
+        }
+        init();
+    </script>
+</body>
+</html>

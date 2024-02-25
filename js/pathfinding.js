@@ -1,15 +1,3 @@
-/*
-Creado por Javier Muñiz @javianmuniz para
-el canal de YouTube "Programar es increíble"
-
-Suscríbete para más vídeos y tutoriales:
-https://www.youtube.com/channel/UCS9KSwTM3FO2Ovv83W98GTg
-
-Enlace al tutorial paso a paso:
-https://youtu.be/NWS-_VsMab4
-*/
-
-
 var canvas;
 var ctx;
 var FPS = 50;
@@ -37,9 +25,6 @@ var closedSet = [];
 var camino = [];
 var terminado = false;
 
-
-
-
 //CREAMOS UN ARRAY 2D
 function creaArray2D(f,c){
   var obj = new Array(f);
@@ -48,8 +33,6 @@ function creaArray2D(f,c){
   }
   return obj;
 }
-
-
 
 function heuristica(a,b){
   var x = Math.abs(a.x - b.x);
@@ -60,7 +43,6 @@ function heuristica(a,b){
   return dist;
 }
 
-
 function borraDelArray(array,elemento){
   for(i=array.length-1; i>=0; i--){
     if(array[i] == elemento){
@@ -68,9 +50,6 @@ function borraDelArray(array,elemento){
     }
   }
 }
-
-
-
 
 
 function Casilla(x,y){
