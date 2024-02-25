@@ -105,8 +105,6 @@
             }
         }
         const init = () => {
-            canvas=document.getElementById('canvas');
-            ctx = canvas.getContext('2d');
             anchoT = parseInt(canvas.width/columnas);
             altoT = parseInt(canvas.height/filas);
             esceneario = crearArray2D(filas,columnas);
@@ -123,6 +121,9 @@
             principio = esceneario[0][0];
             fin = esceneario[columnas-1][filas-1];
             openSet.push(principio);
+
+            
+
             setInterval(() => {
                 principal();
             }, 1000/fps);
@@ -203,6 +204,9 @@
             dibujaEsceneario();
         }
         init();
+        canvas.addEventListener('click', function(){
+            console.log('click');
+        });
     </script>
 </body>
 </html>

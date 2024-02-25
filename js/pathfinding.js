@@ -165,6 +165,26 @@ function inicializa(){
   //INICIALIZAMOS OPENSET
   openSet.push(principio);
 
+  canvas.addEventListener('click',function(e){
+    var x = e.clientX - canvas.getBoundingClientRect().left;
+    var y = e.clientY - canvas.getBoundingClientRect().top;
+
+    x = parseInt(x/anchoT);
+    y = parseInt(y/altoT);
+
+    if(escenario[y][x].tipo!=1){
+      escenario[y][x].tipo = 1;
+    }
+    // else if(escenario[y][x].tipo==1){
+    //   escenario[y][x].tipo = 0;
+    // }
+    else{
+      escenario[y][x].tipo = 0;
+    }
+
+    escenario[y][x].addVecinos();
+  });
+
   //EMPEZAMOS A EJECUTAR EL BUCLE PRINCIPAL
   setInterval(function(){principal();},1000/FPS);
 }
@@ -307,3 +327,22 @@ function principal(){
   algoritmo();
   dibujaEscenario();
 }
+
+// canvas.addEventListener('click',function(evt){
+//   var x = evt.clientX - canvas.getBoundingClientRect().left;
+//   var y = evt.clientY - canvas.getBoundingClientRect().top;
+
+//   x = parseInt(x/anchoT);
+//   y = parseInt(y/altoT);
+
+//   if(escenario[y][x].tipo!=1){
+//     escenario[y][x].tipo = 1;
+//   }
+//   else{
+//     escenario[y][x].tipo = 0;
+//   }
+
+//   escenario[y][x].dibuja();
+
+//   escenario[y][x].addVecinos();
+// },false);
